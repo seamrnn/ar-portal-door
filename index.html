@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>AR Portal</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.7/aframe/build/aframe-ar.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      <!-- Add marker to detect -->
+      <a-marker preset="hiro">
+        <!-- Add portal door -->
+        <a-entity id="portalDoor" 
+          position="0 1 0"
+          rotation="0 180 0"
+          arjs-portal-door="url: #360-image; doorWidth: 2; doorHeight: 2.5;"
+          ></a-entity>
+      </a-marker>
+
+      <!-- Add camera -->
+      <a-entity camera></a-entity>
+
+      <!-- Assets -->
+      <a-assets>
+        <img id="360-image" src="./assets/jhon_wick.jpeg">
+        <img id="door-texture" src="./assets/door.png">
+        <img id="marker-texture" src="./assets/marker.png">
+      </a-assets>
+    </a-scene>
+
+    <!-- Portal360 script -->
+    <script src="https://cdn.rawgit.com/jeromeetienne/threex.portal360/51b7e0d9e9b427f9076326c05d6e2060173c9e2c/threex.portal360.js"></script>
+
+    <!-- Custom component for portal door -->
+    <script>
+      AFRAME.registerComponent('arjs-portal-door', {
+        schema: {
+          url: {
+            type: 'string',
+          },
+          doorWidth: {
+            type: 'number',
+            default: 1,
+          },
+          doorHeight: {
+            type: 'number',
+            default: 2,
+          },
+        },
+        init: function() {
+          var _this = this;
+
+          var doorWidth = this.data.doorWidth;
+          var doorHeight = this.data.doorHeight;
+          var imageURL = this.data.url;
+
+          var portalDoor = new THREEx.Portal360(imageURL, doorWidth, doorHeight, {
+            marker: _this.el,
+            doorTexture: '#door-texture',
+            markerTexture: '#marker-texture',
+          });
+
+          this._portalDoor = portalDoor;
+
+          this.el.object3D.add(portalDoor.object3d);
+        },
+        tick: function() {
+          this._portalDoor.update();
+        }
+      });
+    </script>
+  </body>
+</html>
